@@ -1,0 +1,27 @@
+services:
+  service1:
+    build: microsevice1
+    image: microservice1-image
+    container_name: microservice1-container
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db1
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db1:5432/schema
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+    restart: on-failure
+
+  db1:
+    image: postgres:13.7-alpine
+    container_name: db1-container
+    ports:
+      - "80:5432"
+    environment:
+      - POSTGRES_DB=schema
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+    restart: on-failure
+    volumes:
+      - /postgres/data/new
