@@ -1,5 +1,6 @@
 package ru.study.microservice1.entities;
 
+import dtos.BrowserPageDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
@@ -14,4 +15,9 @@ public class BrowserPage {
     @Id
     private Long id;
     private String content;
+
+    public BrowserPage(BrowserPageDto dto) {
+        this.id = dto.getId();
+        this.content = dto.getContent();
+    }
 }

@@ -1,8 +1,9 @@
 package ru.study.microservice1.controllers;
 
+import dtos.BrowserPageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.study.microservice1.entities.BrowserPage;
+import ru.study.microservice1.clients.StatisticsClient;
 import ru.study.microservice1.service.PageServiceImpl;
 
 @RestController
@@ -10,14 +11,19 @@ import ru.study.microservice1.service.PageServiceImpl;
 @RequiredArgsConstructor
 public class PageController {
     private final PageServiceImpl pageService;
+    private final StatisticsClient client;
 
     @GetMapping("{id}")
-    public BrowserPage getById(@PathVariable Long id) {
-        return pageService.getById(id);
+    public BrowserPageDto getById(@PathVariable Long id) {
+        BrowserPageDto dto =  pageService.getById(id);
+        client.increaseViewsKafka(dto);
+        return dto;
     }
 
     @PostMapping
-    public BrowserPage save(@RequestBody BrowserPage browserPage) {
-        return pageService.save(browserPage);
+    public BrowserPageDto save(@RequestBody BrowserPageDto browserPage) {
+        BrowserPageDto dto = pageService.save(browserPage);
+        client.createStatisticsKafka(dto);
+        return dto;
     }
 }

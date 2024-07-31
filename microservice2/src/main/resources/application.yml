@@ -1,7 +1,7 @@
 spring:
   application:
     name:
-      microsevice1
+      microservice2
   jpa:
     hibernate:
       ddl-auto: none
@@ -18,16 +18,12 @@ spring:
     init:
       mode: always
   kafka:
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.JsonSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.JsonDeserializer
 server:
   port: 8080
 
-api:
-  statistics:
-    server:
-      url: ${STATISTICS_SERVER_URL}
 
 
 

@@ -1,5 +1,6 @@
 package ru.study.microservice1.service;
 
+import dtos.BrowserPageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,13 +13,20 @@ public class PageServiceImpl {
     private final PageRepository pageRepository;
 
     @Transactional
-    public BrowserPage save(BrowserPage browserPage) {
-        return pageRepository.save(browserPage);
+    public BrowserPageDto save(BrowserPageDto dto) {
+        BrowserPage pageToSave = new BrowserPage(dto);
+        BrowserPage newPage = pageRepository.save(pageToSave);
+        return mapToDto(newPage);
     }
 
     @Transactional
-    public BrowserPage getById(Long id) {
+    public BrowserPageDto getById(Long id) {
         return pageRepository.findById(id)
+                .map(this::mapToDto)
                 .orElseThrow(() -> new RuntimeException("Page not found"));
+    }
+
+    private BrowserPageDto mapToDto(BrowserPage browserPage) {
+        return new BrowserPageDto(browserPage.getId(), browserPage.getContent());
     }
 }

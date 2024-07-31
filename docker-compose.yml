@@ -7,10 +7,13 @@ services:
       - "8080:8080"
     depends_on:
       - db1
+      - broker
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db1:5432/schema
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
+      - STATISTICS_SERVER_URL=http://service2:8080/stats
+      - KAFKA_BOOTSTRAP_SERVERS=http://broker:9092
     restart: on-failure
 
   db1:
@@ -25,3 +28,46 @@ services:
     restart: on-failure
     volumes:
       - /postgres/data/new
+
+  service2:
+    build: microservice2
+    image: microservice2-image
+    container_name: microservice2-container
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db1
+      - broker
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db1:5432/schema
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - KAFKA_BOOTSTRAP_SERVERS=http://broker:9092
+    restart: on-failure
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "22181:2181"
+
+  broker:
+    image: confluentinc/cp-kafka:latest
+    container_name: broker
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
